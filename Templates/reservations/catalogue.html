@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="d-flex justify-content-start mt-3 mb-2">
+    <a href="{% url 'mes_reservations' %}" class="btn btn-primary shadow-sm">
+        <i class="fa-solid fa-list me-2"></i> Mes Réservations
+    </a>
+</div>
+
+<div class="row mt-2">
+    <div class="col-md-8">
+        <h2 class="mb-4">🏨 Catalogue des Établissements Hôteliers</h2>
+        
+        <form method="GET" class="d-flex mb-4 shadow-sm rounded">
+            <input type="text" name="ville" class="form-control me-2" placeholder="Rechercher une destination (ex: Safi, Marrakech)..." value="{{ ville|default:'' }}">
+            <button type="submit" class="btn btn-dark px-4">Rechercher</button>
+        </form>
+
+        <div class="row">
+            {% if hotels %}
+                {% for hotel in hotels %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        {% if hotel.photo %}
+                            <img src="{{ hotel.photo.url }}" class="card-img-top" alt="{{ hotel.nom }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <span>Aucune photo disponible</span>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title font-weight-bold">{{ hotel.nom }}</h5>
+                            <p class="card-text text-muted mb-3">📍 {{ hotel.ville }}</p>
+                            <a href="{% url 'voir_hotel' hotel.id %}" class="btn btn-primary btn-sm w-100">Découvrir & Voir Tarifs IA</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-warning text-center shadow-sm">
+                        Aucun hôtel disponible actuellement. Rendez-vous sur <a href="/admin" class="alert-link">l'espace Admin</a> pour en ajouter un !
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow border-0" style="position: sticky; top: 20px;">
+            <div class="card-header bg-dark text-white d-flex align-items-center">
+                <span class="fs-5 me-2">🤖</span>
+                <strong class="card-title mb-0">Assistant de Recommandation</strong>
+            </div>
+            <div class="card-body bg-light" style="height: 320px; overflow-y: auto;" id="chat-box">
+                <div class="p-2 mb-2 bg-white rounded shadow-sm text-muted">
+                    <small><strong>IA:</strong> Bonjour ! Je suis votre conseiller hôtelier. Demandez-moi des "hôtels à Safi", à "Marrakech" ou des infos sur nos "tarifs" !</small>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-0">
+                <div class="input-group">
+                    <input type="text" id="chat-input" class="form-control" placeholder="Posez votre question..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                    <button class="btn btn-primary" type="button" onclick="sendMessage()">Envoyer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function sendMessage() {
+    let input = document.getElementById('chat-input');
+    let box = document.getElementById('chat-box');
+    let message = input.value.trim();
+    if(!message) return;
+
+    
+    box.innerHTML += `
+        <div class="p-2 mb-2 bg-primary text-white rounded shadow-sm text-end ms-5">
+            <small><strong>Vous:</strong> ${message}</small>
+        </div>`;
+    input.value = '';
+    box.scrollTop = box.scrollHeight;
+
+    
+    fetch(`/chatbot/?message=${encodeURIComponent(message)}`)
+        .then(response => response.json())
+        .then(data => {
+            box.innerHTML += `
+                <div class="p-2 mb-2 bg-white rounded shadow-sm text-start me-5 border-start border-primary border-3">
+                    <small class="text-primary"><strong>IA:</strong></small> <small class="text-dark">${data.reply}</small>
+                </div>`;
+            box.scrollTop = box.scrollHeight;
+        })
+        .catch(error => {
+            console.error('Erreur Chatbot:', error);
+        });
+}
+</script>
+{% endblock %}

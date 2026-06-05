@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Finaliser la Réservation - HotelBooking IA</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .payment-card { border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        .btn-pay { background: linear-gradient(135deg, #0d6efd, #0a58ca); font-weight: 600; padding: 12px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card payment-card p-4 bg-white">
+                <h3 class="mb-4 text-center text-dark fw-bold">💳 Sécuriser la Réservation</h3>
+                
+                <div class="alert alert-info py-2 small mb-4">
+                    <i class="fa fa-info-circle"></i> Vous réservez la chambre : <strong>{{ chambre.numero_chambre }}</strong>
+                </div>
+
+                
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    
+                    
+                    <div class="mb-3">
+                        <label for="nom_client" class="form-label fw-semibold text-secondary">Nom Complet du Voyageur</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="fa fa-user"></i></span>
+                            <input type="text" id="nom_client" name="nom_client" class="form-control" placeholder="Ex: Anass El Mansouri" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label for="date_arrivee" class="form-label fw-semibold text-secondary">Date d'arrivée</label>
+                            <input type="date" id="date_arrivee" name="date_arrivee" class="form-control" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label for="date_depart" class="form-label fw-semibold text-secondary">Date de départ</label>
+                            <input type="date" id="date_depart" name="date_depart" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted my-4">
+
+                    <h5 class="mb-3 text-secondary fw-semibold"><i class="fa fa-credit-card"></i> Détails de Paiement (Simulé Stripe)</h5>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Numéro de carte</label>
+                        <input type="text" class="form-control" placeholder="4242 4242 4242 4242" value="4242 4242 4242 4242" disabled>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-4">
+                            <label class="form-label small text-muted">Expiration</label>
+                            <input type="text" class="form-control" placeholder="MM/AA" value="12/29" disabled>
+                        </div>
+                        <div class="col-6 mb-4">
+                            <label class="form-label small text-muted">CVC</label>
+                            <input type="text" class="form-control" placeholder="123" value="123" disabled>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-pay w-100 text-white shadow-sm border-0">
+                        <i class="fa fa-lock"></i> Confirmer & Payer avec Stripe
+                    </button>
+                </form>
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="{% url 'home' %}" class="text-decoration-none small text-muted"><i class="fa fa-arrow-left"></i> Annuler et retourner au catalogue</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+   
+    window.onload = function() {
+        let today = new Date();
+        let tomorrow = new Date();
+        tomorrow.setDate(today.getDate() + 1);
+
+        document.getElementById('date_arrivee').value = today.toISOString().split('T')[0];
+        document.getElementById('date_depart').value = tomorrow.toISOString().split('T')[0];
+    };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-md-7">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Catalogue</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ hotel.nom }}</li>
+            </ol>
+        </nav>
+
+        <h1 class="display-5 font-weight-bold">{{ hotel.nom }}</h1>
+        <p class="text-muted fs-5">📍 {{ hotel.adresse }} ({{ hotel.ville }})</p>
+        <hr>
+        <p><strong>✨ Services & Équipements inclus :</strong> <span class="badge bg-secondary">{{ hotel.equipements }}</span></p>
+
+        <h4 class="mt-4 mb-3">🛏️ Offres disponibles (Tarification dynamique par IA)</h4>
+        <div class="list-group shadow-sm">
+            {% if chambres_ia %}
+                {% for item in chambres_ia %}
+                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3">
+                    <div>
+                        <h5 class="mb-1 text-primary">Chambre N° {{ item.chambre.numero_chambre }}</h5>
+                        <p class="mb-0 text-muted"><small>Catégorie : {{ item.chambre.type_chambre.libelle }}</small></p>
+                    </div>
+                    <div class="text-end">
+                        <h4 class="text-success mb-0">{{ item.prix_ia }} DH <span class="fs-6 text-muted">/ nuit</span></h4>
+                        <del class="text-muted"><small>Tarif Standard: {{ item.chambre.prix_base_nuit }} DH</small></del>
+                        <br>
+                        <a href="{% url 'creer_reservation' item.chambre.id %}" class="btn btn-warning btn-sm fw-bold mt-2 shadow-sm">Réserver via Stripe</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="list-group-item text-center text-muted p-4">
+                    Aucune chambre répertoriée pour cet hôtel actuellement. Ajoutez-en depuis l'espace admin.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <h4 class="mb-3">🗺️ Géolocalisation de l'établissement</h4>
+        <div id="map" class="rounded shadow-lg" style="height: 420px; border: 2px solid #ddd;"></div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    var lat = parseFloat("{{ hotel.latitude|default:0 }}");
+    var lng = parseFloat("{{ hotel.longitude|default:0 }}");
+    
+   
+    if (lat === 0 && lng === 0) { lat = 32.2957; lng = -9.2315; }
+
+    var map = L.map('map').setView([lat, lng], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    L.marker([lat, lng]).addTo(map)
+        .bindPopup("<div class='text-center'><strong>{{ hotel.nom }}</strong><br><small>{{ hotel.ville }}</small></div>")
+        .openPopup();
+});
+</script>
+{% endblock %}
